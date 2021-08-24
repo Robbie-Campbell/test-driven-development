@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PersonController;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,3 +18,10 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::get('/person', [PersonController::class, 'index']);
+Route::get('/person/{id}', [PersonController::class, 'show']);
+Route::post('/person', [PersonController::class, 'store']);
+Route::put('/person/{id}', [PersonController::class, 'update']);
+Route::delete('/person/{id}', [PersonController::class, 'delete']);
+
