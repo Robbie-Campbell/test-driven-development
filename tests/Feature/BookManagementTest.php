@@ -2,12 +2,13 @@
 
 namespace Tests\Feature;
 
+use App\Models\Author;
 use App\Models\Book;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
-/** test */
 class BookManagementTest extends TestCase
 {
     use RefreshDatabase;
@@ -26,7 +27,7 @@ class BookManagementTest extends TestCase
 
     public function test_an_author_is_required() {
         $response = $this->createANewBook('test', '');
-        $response->assertSessionHasErrors('author');
+        $response->assertSessionHasErrors('author_id');
     }
 
     public function test_a_book_can_be_updated() {
@@ -34,10 +35,10 @@ class BookManagementTest extends TestCase
         $book = Book::first();
         $response = $this->patch($book->path(),[
            'title' => 'new title',
-           'author' => 'kelly'
+           'author_id' => 'kelly'
         ]);
         $this->assertEquals('new title', Book::first()->title);
-        $this->assertEquals('kelly', Book::first()->author);
+        $this->assertEquals(DB::getPdo()->lastInsertId(), Book::first()->author_id);
         $response->assertRedirect($book->path());
     }
 
@@ -50,11 +51,21 @@ class BookManagementTest extends TestCase
         $response->assertRedirect('/books');
     }
 
+    public function test_a_new_author_is_automatically_added() {
+        $this->createANewBook('test', 'rab');
+
+        $book = Book::first();
+        $author = Author::first();
+
+        $this->assertCount(1, Author::all());
+        $this->assertEquals($author->id, $book->author_id);
+    }
+
     public function createANewBook($title, $author)
     {
         return $this->post('api/books', [
             'title' => $title,
-            'author' => $author
+            'author_id' => $author
         ]);
     }
 }
